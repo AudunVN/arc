@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<style>
+			@font-face {
+				font-family: unifont;
+				src: url("https://24e3021dd42ba493ca4b980e89f1158d0706cb0f.googledrive.com/host/0B-jbiuTm6FjRVUdKSWRnRFlLS0k/unifont-8.0.01.ttf");
+			}
+
+			.appContainer {
+				position: relative;
+				width: 30em;
+				background-color: #001;
+				margin: 0 auto;
+				border: 2px solid #13B;
+				border-radius: 3px;
+				padding: 0.5em;
+				font-family: unifont, sans-serif;
+				font-size: 16px;
+				color: white;
+			}
+
+			.ioContainer {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+			}
+
+			.uiContainer {
+				display: block;
+				height: 50%;
+				position: relative;
+				border: 1px solid #13B;
+				padding: 0.2em;
+				margin-bottom: 0.5em;
+				height: 7em;
+			}
+
+			/* button styles begin */
+
+			.inputRow {
+				margin-bottom: 0.5em;
+			}
+
+			.button {
+				min-width: 1em;
+				min-height: 1em;
+				border: 1px solid #13B;
+				display: inline-block;
+				padding: 0.5em;
+				padding-top: 0.3em;
+				cursor: pointer;
+			}
+			/* button styles end */
+
+			/* terminal styles begin */
+			.term {
+				overflow-y: auto;
+				overflow-x: hidden;
+				width: 100%;
+				height: 5em;
+				border: 1px solid #13B;
+			}
+
+			.term .outputLine {
+				width: 100%;
+				min-height: 1em;
+				display: inline-block;
+				color: #BB6622;
+			}
+
+			.termInput {
+				position: relative;
+				width: 100%;
+				height: 1em;
+				border: 1px solid #13B;
+				border-top: none;
+				font-size: 1em;
+				padding-bottom: 0.2em;
+			}
+
+			.termInput .inputIndicator {
+				position: absolute;
+				left: 0.35em;
+			}
+
+			.termInput input {
+				display: block;
+			   position: absolute;
+				border: 0;
+				padding: 0;
+				left: 1em;
+				right: 0;
+				top: 0;
+				width: 29em;
+				bottom: 0;
+				background-color: transparent;
+				color: white;
+				font-size: 1em;
+				font-family: unifont, sans-serif;
+			}
+
+			.term .outputLine:nth-child(even) {background: #060136}
+			.term .outputLine:nth-child(odd) {background: #010613}
+			/* terminal styles end */
+
+			/* meter styles begin */
+			.meter {
+				display: inline-block;
+				position: relative;
+				height: 100%;
+				width: 1em;
+				border: 1px solid #13B;
+				margin: 0px;
+				box-sizing: border-box;
+			}
+
+			.meter label {
+				position: absolute;
+				transform: rotate(-90deg);
+				z-index: 2;
+				white-space: nowrap;
+			}
+
+			.meter.lfMeter label {
+				bottom: 1.75em;
+				left: -1.85em;
+			}
+
+			.meter.loMeter label {
+				bottom: 1.5em;
+				left: -1.6em;
+			}
+
+			.meter.throttleMeter label {
+				bottom: 1.475em;
+				left: -1.6em;
+			}
+
+			.meter .meterState {
+				top: 100%;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+				position: absolute;
+				background-color: #13B;
+				transition: top linear 0.5s;
+			}
+
+			.meter.throttleMeter .meterState {
+				top: 60%;
+			}
+
+			.meter.fuelMeter .meterState {
+				top: 10%;
+			}
+
+			.meter.rhoMeter .meterState {
+				top: 90%;
+			}
+			/* meter styles end */
+		</style>
+	</head>
+	<body>
+		<div class="appContainer">
+			<div class="ioContainer">
+				<div class="uiContainer">
+					<div data-state="100" class="meter throttleMeter">
+						<label>THROTTLE</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div data-state="100" class="meter lfMeter">
+						<label>FUEL (LF)</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div data-state="100" class="meter loMeter">
+						<label>FUEL (O)</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div data-state="100" class="meter fuelMeter">
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div data-state="100" class="meter fuelMeter">
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div data-state="100" class="meter fuelMeter">
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+				</div>
+				<div class="inputRow">
+					<div class="button" onclick="doApiRequest('f.stage')">STAGE</div>
+					<div class="button" onclick="doApiRequest('f.abort')">ABORT</div>
+					<div class="button" onclick="doApiRequest('f.throttleUp')">T+</div>
+					<div class="button" onclick="doApiRequest('f.throttleDown')">T-</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">T->0</div>
+				</div>
+				<div class="term">
+					<div class="outputLine">
+						<span class="timestamp">T-5</span>
+						<span class="output">Vessel staged.</span>	
+					</div>
+					<div class="outputLine">
+						<span class="timestamp">T-1</span>
+						<span class="output">Liquid fuel usage rate negative (main engine ignition)</span>	
+					</div>
+					<div class="outputLine">
+						<span class="timestamp">T+1</span>
+						<span class="output">Altitude change rate positive (liftoff)</span>
+					</div>
+					<div class="outputLine">
+						<span class="timestamp">T+15</span>
+						<span class="output">Vessel staged.</span>
+					</div>
+					<div class="outputLine">
+						<span class="timestamp">T+45</span>
+						<span class="output">Maximum dynamic pressure acheived.</span>
+					</div>
+				</div>
+				<div class="termInput"><span class="inputIndicator">></span><input type="text"></div>
+			</div>
+		</div>
+		<script>
+			var URL = "127.0.0.1:8085";
+			var updateRate = 5000;
+
+			function doApiRequest(apiString) {
+				console.log("doing get request");
+				$.get("http://"+URL+"/telemachus/datalink?a="+apiString, function(data) {
+					console.log("ok: "+apiString);
+					return $.parseJSON(data);
+				});
+			}
+			
+			function log(terminalIdentifier, outputString, timestamp) {
+				$(terminalIdentifier).append('<div class="outputLine"><span class="timestamp">'+timestamp+'</span> <span class="output">'+outputString+'</span></div>');
+			}
+			
+			function updateInterface() {
+				var requestString = "throttle=f.throttle";
+				requestString += "&lfmax=r.resourceMax[LiquidFuel]";
+				requestString += "&lomax=r.resourceMax[Oxidizer]";
+				requestString += "&lf=r.resource[LiquidFuel]";
+				requestString += "&lo=r.resource[Oxidizer]";
+				requestString += "&mTime=v.missionTime";
+				$.get("http://"+URL+"/telemachus/datalink?"+requestString, function(data) {
+					var parsedData = $.parseJSON(data);
+					console.log(parsedData);
+					document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
+					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
+					document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
+					log(".term","Test.","T+"+Math.round(Number(parsedData.mTime)));
+				});
+				setTimeout(function(){ updateInterface(); }, updateRate);
+			}
+			
+			log(".term","Console output started.","T-?");
+			
+			updateInterface();
+		</script>
+	</body>
+</html>
