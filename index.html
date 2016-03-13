@@ -7,10 +7,13 @@
 				font-family: unifont;
 				src: url("https://24e3021dd42ba493ca4b980e89f1158d0706cb0f.googledrive.com/host/0B-jbiuTm6FjRVUdKSWRnRFlLS0k/unifont-8.0.01.ttf");
 			}
+			
+			html {
+				background: black;
+			}
 
 			.appContainer {
-				position: relative;
-				width: 30em;
+				position: absolute;
 				background-color: #001;
 				margin: 0 auto;
 				border: 2px solid #13B;
@@ -19,6 +22,8 @@
 				font-family: unifont, sans-serif;
 				font-size: 16px;
 				color: white;
+				left: 50%;
+				transform: translate(-50%);
 			}
 
 			.ioContainer {
@@ -34,17 +39,18 @@
 				position: relative;
 				border: 1px solid #13B;
 				padding: 0.2em;
-				margin-bottom: 0.5em;
-				height: 7em;
+				text-align: center;
 			}
 
 			/* button styles begin */
 
 			.inputRow {
 				margin-bottom: 0.5em;
+				text-align: center;
 			}
 
 			.button {
+				margin-top: 0.5em;
 				min-width: 1em;
 				min-height: 1em;
 				border: 1px solid #13B;
@@ -93,13 +99,13 @@
 
 			.termInput input {
 				display: block;
-			   position: absolute;
+			    position: absolute;
 				border: 0;
 				padding: 0;
 				left: 1em;
 				right: 0;
 				top: 0;
-				width: 29em;
+				width: 90%;
 				bottom: 0;
 				background-color: transparent;
 				color: white;
@@ -113,6 +119,7 @@
 
 			/* meter styles begin */
 			.meter {
+				min-height: 7em;
 				display: inline-block;
 				position: relative;
 				height: 100%;
@@ -215,12 +222,10 @@
 		</div>
 		<script>
 			var URL = "127.0.0.1:8085";
-			var updateRate = 5000;
+			var updateRate = 100;
 
 			function doApiRequest(apiString) {
-				console.log("doing get request");
 				$.get("http://"+URL+"/telemachus/datalink?a="+apiString, function(data) {
-					console.log("ok: "+apiString);
 					return $.parseJSON(data);
 				});
 			}
@@ -239,7 +244,6 @@
 				requestString += "&mTime=v.missionTime";
 				$.get("http://"+URL+"/telemachus/datalink?"+requestString, function(data) {
 					var parsedData = $.parseJSON(data);
-					console.log(parsedData);
 					document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
 					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
 					document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
@@ -247,6 +251,13 @@
 				});
 				setTimeout(function(){ updateInterface(); }, updateRate);
 			}
+
+			$(".termInput input").keyup(function(key) {
+				if (key.keyCode == 13) {
+					log(".term",document.querySelector(".termInput input").value,"&nbsp;>");
+					document.querySelector(".termInput input").value = "";
+				}
+			});
 			
 			log(".term","Console output started.","T-X");
 			
