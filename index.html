@@ -53,6 +53,10 @@
 				padding-top: 0.3em;
 				cursor: pointer;
 			}
+			
+			.button:hover {
+				background: orange;
+			}
 			/* button styles end */
 
 			/* terminal styles begin */
@@ -68,7 +72,7 @@
 				width: 100%;
 				min-height: 1em;
 				display: inline-block;
-				color: #BB6622;
+				color: /*#BB6622*/ orange;
 			}
 
 			.termInput {
@@ -204,26 +208,6 @@
 					<div class="button" onclick="doApiRequest('f.throttleZero')">T->0</div>
 				</div>
 				<div class="term">
-					<div class="outputLine">
-						<span class="timestamp">T-5</span>
-						<span class="output">Vessel staged.</span>	
-					</div>
-					<div class="outputLine">
-						<span class="timestamp">T-1</span>
-						<span class="output">Liquid fuel usage rate negative (main engine ignition)</span>	
-					</div>
-					<div class="outputLine">
-						<span class="timestamp">T+1</span>
-						<span class="output">Altitude change rate positive (liftoff)</span>
-					</div>
-					<div class="outputLine">
-						<span class="timestamp">T+15</span>
-						<span class="output">Vessel staged.</span>
-					</div>
-					<div class="outputLine">
-						<span class="timestamp">T+45</span>
-						<span class="output">Maximum dynamic pressure acheived.</span>
-					</div>
 				</div>
 				<div class="termInput"><span class="inputIndicator">></span><input type="text"></div>
 			</div>
@@ -242,6 +226,7 @@
 			
 			function log(terminalIdentifier, outputString, timestamp) {
 				$(terminalIdentifier).append('<div class="outputLine"><span class="timestamp">'+timestamp+'</span> <span class="output">'+outputString+'</span></div>');
+				$(terminalIdentifier).animate({scrollTop:$(terminalIdentifier)[0].scrollHeight}, 1000);
 			}
 			
 			function updateInterface() {
@@ -262,7 +247,7 @@
 				setTimeout(function(){ updateInterface(); }, updateRate);
 			}
 			
-			log(".term","Console output started.","T-?");
+			log(".term","Console output started.","T-X");
 			
 			updateInterface();
 		</script>
