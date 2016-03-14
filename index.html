@@ -334,10 +334,14 @@
 		<script>
 			var URL = "127.0.0.1:8085";
 			var updateRate = 100;
+			var updateThrottle = 10000;
 
 			function doApiRequest(apiString) {
-				$.get("http://"+URL+"/telemachus/datalink?a="+apiString, function(data) {
+				$.get("http://"+URL+"/telemachus/datalink?a="+apiString).success(function(data) {
+					log(".term","Command \""+apiString+"\" issued to active vessel.","&nbsp;>");
 					return $.parseJSON(data);
+				}).error(function(jqXHR, textStatus, errorThrown) {
+					log(".term","Command \""+apiString+"\" failed: Unable to contact vessel.","&nbsp;>");
 				});
 			}
 			
@@ -353,14 +357,18 @@
 				requestString += "&lf=r.resource[LiquidFuel]";
 				requestString += "&lo=r.resource[Oxidizer]";
 				requestString += "&mTime=v.missionTime";
-				$.get("http://"+URL+"/telemachus/datalink?"+requestString, function(data) {
+				$.get("http://"+URL+"/telemachus/datalink?"+requestString).success(function(data) {
+					updateThrottle = 0;
 					var parsedData = $.parseJSON(data);
 					document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
 					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
 					document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
 					log(".term","Test.","T+"+Math.round(Number(parsedData.mTime)));
+				}).error(function(jqXHR, textStatus, errorThrown) {
+					updateThrottle = 10000;
+					log(".term","Interface update failed: Unable to contact vessel. Retrying in ten seconds.","&nbsp;>");
 				});
-				setTimeout(function(){ updateInterface(); }, updateRate);
+				setTimeout(function(){ updateInterface(); }, updateRate+updateThrottle);
 			}
 
 			$(".termInput input").keyup(function(key) {
