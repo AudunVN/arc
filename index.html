@@ -17,7 +17,6 @@
 				background-color: #001;
 				margin: 0 auto;
 				border: 2px solid #13B;
-				border-radius: 3px;
 				padding: 0.5em;
 				font-family: unifont, sans-serif;
 				font-size: 16px;
@@ -40,6 +39,7 @@
 				border: 1px solid #13B;
 				padding: 0.2em;
 				text-align: center;
+				padding-bottom: 0em;
 			}
 
 			/* button styles begin */
@@ -58,6 +58,14 @@
 				padding: 0.5em;
 				padding-top: 0.3em;
 				cursor: pointer;
+			}
+			
+			.button[data-state="inactive"] {
+				background: #961717;
+			}
+			
+			.button[data-state="active"] {
+				background: green;
 			}
 			
 			.button:hover {
@@ -116,6 +124,50 @@
 			.term .outputLine:nth-child(even) {background: #060136}
 			.term .outputLine:nth-child(odd) {background: #010613}
 			/* terminal styles end */
+			
+			/* graph styles begin */
+			.graph {
+				min-height: 7em;
+				min-width: 7em;
+				display: inline-block;
+				position: relative;
+				height: 100%;
+				border: 1px solid #13B;
+				margin: 0px;
+				box-sizing: border-box;
+				background-image: url("http://qipeace.com/images/SineGoldSide.png");
+				background-size: contain;
+				background-repeat: no-repeat;
+				background-position: 50% 50%;
+				margin-left: -0.15em;
+				margin-bottom: 0.1em;
+			}
+			
+			.graph label {
+				position: absolute;
+				z-index: 2;
+				padding-left: 0.15em;
+				padding-right: 0.15em;
+			}
+			
+			.graph label.graphName {
+				left: 0;
+				top: 0;
+			}
+			
+			.graph label.maxValue {
+				right: 0;
+				top: 0;
+			}
+			.graph label.minValue {
+				right: 0;
+				bottom: 0;
+			}
+			.graph label.currentValue {
+				left: 0;
+				bottom: 0;
+			}
+			/* graph styles end */
 
 			/* meter styles begin */
 			.meter {
@@ -127,6 +179,8 @@
 				border: 1px solid #13B;
 				margin: 0px;
 				box-sizing: border-box;
+				margin-left: -0.15em;
+				margin-bottom: 0.1em;
 			}
 
 			.meter label {
@@ -135,8 +189,8 @@
 				word-wrap: break-word;
 				width: 100%;
 				left: 0;
-				bottom: 0;
-				top: 0;
+				top: 50%;
+				transform: translateY(-50%);
 				vertical-align: center;
 				margin: 0 auto;
 				right: 0;
@@ -191,11 +245,62 @@
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div class="meter fuelMeter">
+					<div class="meter pitchMeter">
+						<label>PTCH</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div class="meter fuelMeter">
+					<div class="meter yawMeter">
+						<label>YAW</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="meter rollMeter">
+						<label>ROLL</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="meter altMeter">
+						<label>3 ALT</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="meter aglMeter">
+						<label>0 AGL</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="meter rhoMeter">
+						<label>ATM</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="meter battMeter">
+						<label>BATT</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="graph altGraph">
+						<label class="graphName">ALT</label>
+						<label class="maxValue">10^3</label>
+						<label class="minValue">0</label>
+						<label class="currentValue">786</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="graph fuelGraph">
+						<label class="graphName">LF</label>
+						<label class="maxValue">10^3</label>
+						<label class="minValue">0</label>
+						<label class="currentValue">786</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+					</div>
+					<div class="graph battGraph">
+						<label class="graphName">BATT</label>
+						<label class="maxValue">10^3</label>
+						<label class="minValue">0</label>
+						<label class="currentValue">786</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
@@ -203,9 +308,23 @@
 				<div class="inputRow">
 					<div class="button" onclick="doApiRequest('f.stage')">STAGE</div>
 					<div class="button" onclick="doApiRequest('f.abort')">ABORT</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">SAS</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">RCS</div>
+					<div class="button" data-state="inactive" onclick="doApiRequest('f.throttleZero')">LIGHT</div>
+					<div class="button" data-state="active" onclick="doApiRequest('f.throttleZero')">GEARS</div>
 					<div class="button" onclick="doApiRequest('f.throttleUp')">T+</div>
 					<div class="button" onclick="doApiRequest('f.throttleDown')">T-</div>
 					<div class="button" onclick="doApiRequest('f.throttleZero')">T->0</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT1</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT2</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT3</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT4</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT5</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT6</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT7</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT8</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT9</div>
+					<div class="button" onclick="doApiRequest('f.throttleZero')">ACT0</div>
 				</div>
 				<div class="term">
 				</div>
