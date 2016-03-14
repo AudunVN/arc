@@ -131,24 +131,15 @@
 
 			.meter label {
 				position: absolute;
-				transform: rotate(-90deg);
 				z-index: 2;
-				white-space: nowrap;
-			}
-
-			.meter.lfMeter label {
-				bottom: 1.75em;
-				left: -1.85em;
-			}
-
-			.meter.loMeter label {
-				bottom: 1.5em;
-				left: -1.6em;
-			}
-
-			.meter.throttleMeter label {
-				bottom: 1.475em;
-				left: -1.6em;
+				word-wrap: break-word;
+				width: 100%;
+				left: 0;
+				bottom: 0;
+				top: 0;
+				vertical-align: center;
+				margin: 0 auto;
+				right: 0;
 			}
 
 			.meter .meterState {
@@ -180,30 +171,31 @@
 		<div class="appContainer">
 			<div class="ioContainer">
 				<div class="uiContainer">
-					<div data-state="100" class="meter throttleMeter">
-						<label>THROTTLE</label>
+					<div class="meter throttleMeter">
+						<label>THR</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div data-state="100" class="meter lfMeter">
-						<label>FUEL (LF)</label>
+					<div class="meter lfMeter">
+						<label>LF</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div data-state="100" class="meter loMeter">
-						<label>FUEL (O)</label>
+					<div class="meter loMeter">
+						<label>OX</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div data-state="100" class="meter fuelMeter">
+					<div class="meter rcsMeter">
+						<label>RCS</label>
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div data-state="100" class="meter fuelMeter">
+					<div class="meter fuelMeter">
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
-					<div data-state="100" class="meter fuelMeter">
+					<div class="meter fuelMeter">
 						<div class="meterState"></div>
 						<span class="meterValue"></span>
 					</div>
@@ -254,8 +246,20 @@
 
 			$(".termInput input").keyup(function(key) {
 				if (key.keyCode == 13) {
-					log(".term",document.querySelector(".termInput input").value,"&nbsp;>");
+					var termInput = document.querySelector(".termInput input").value;
+					var sanitizedInput = termInput.toLowerCase().trim();
+					log(".term",termInput,"&nbsp;<");
 					document.querySelector(".termInput input").value = "";
+					switch(sanitizedInput) {
+						case "help": {
+							log(".term","Haven't got any help for you yet, sorry.","&nbsp;>");
+							break;
+						}
+						default: {
+							log(".term","Invalid or unknown command.","&nbsp;>");
+							break;
+						}
+					}
 				}
 			});
 			
