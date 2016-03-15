@@ -129,8 +129,6 @@
 			
 			/* graph styles begin */
 			.graph {
-				min-height: 10em;
-				min-width: 10em;
 				display: inline-block;
 				position: relative;
 				height: 100%;
@@ -143,12 +141,16 @@
 				background-position: 50% 50%;
 				margin-left: -0.15em;
 				margin-bottom: 0.1em;
+				min-height: 152px;
+                min-width: 302px;
 			}
 			
 			.graph canvas {
-				position: relative;
-				min-height: 9.9em;
-				min-width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
 				padding: 0;
 				margin: 0;
 				display: block;
@@ -182,7 +184,7 @@
 
 			/* meter styles begin */
 			.meter {
-				min-height: 10em;
+				min-height: 152px;
 				display: inline-block;
 				position: relative;
 				height: 100%;
