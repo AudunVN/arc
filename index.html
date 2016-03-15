@@ -452,6 +452,15 @@
 							clearTimeout(updateTimer);
 							break;
 						}
+						case "rate" : {
+							if (!!splitInput[1] && !isNaN(splitInput[1])) {
+								updateRate = Number(splitInput[1]);
+								log(".term","Update rate set to "+updateRate+" ms.","&nbsp;>");
+							} else {
+								log(".term","Invalid update rate.","&nbsp;>");
+							}
+							break;
+						}
 						case "startup" : {
 							updateInterface();
 							break;
