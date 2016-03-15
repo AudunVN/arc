@@ -323,6 +323,13 @@
 						<span class="meterValue"></span>
 						<canvas class="smoothie-chart">
 					</div>
+					<div class="graph gGraph">
+						<label class="graphName">G</label>
+						<label class="currentValue">786</label>
+						<div class="meterState"></div>
+						<span class="meterValue"></span>
+						<canvas class="smoothie-chart">
+					</div>
 				</div>
 				<div class="inputRow">
 					<div class="button" onclick="doApiRequest('f.stage')">STAGE</div>
@@ -355,7 +362,7 @@
 			var updateRate = 100;
 			var updateThrottle = 10000;
 			var connectionAttempted = true;
-			var demoMode = true;
+			var demoMode = false;
 
 			function doApiRequest(apiString) {
 				$.get("http://"+URL+"/telemachus/datalink?a="+apiString).success(function(data) {
@@ -376,6 +383,10 @@
 			var randomBatt = new TimeSeries();
 			var randomAlt = new TimeSeries();
 			var randomFuel = new TimeSeries();
+			var battArray = new TimeSeries();
+			var altArray = new TimeSeries();
+			var fuelArray = new TimeSeries();
+			var gArray = new TimeSeries();
 			
 			function updateInterface() {
 				/* graph code begins */
@@ -392,6 +403,9 @@
 					document.querySelector(".meter.battMeter .meterState").style.top = 100-(randomBattValue/10000)*100+"%";
 					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
 					document.querySelector(".meter.loMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
+					battArray = randomBatt;
+					altArray = randomAlt;
+					fuelArray = randomFuel;
 				}
 				if (!connectionAttempted) {
 					$(".appContainer").addClass("noConnection");
@@ -404,8 +418,12 @@
 				requestString += "&lfmax=r.resourceMax[LiquidFuel]";
 				requestString += "&lomax=r.resourceMax[Oxidizer]";
 				requestString += "&lf=r.resource[LiquidFuel]";
+				requestString += "&batt=r.resource[ElectricCharge]";
 				requestString += "&lo=r.resource[Oxidizer]";
 				requestString += "&mTime=v.missionTime";
+				requestString += "&alt=v.altitude";
+				requestString += "&agl=v.heightFromTerrain";
+				requestString += "&g=v.geeForce";
 				if (connectionAttempted) {
 					$.get("http://"+URL+"/telemachus/datalink?"+requestString).success(function(data) {
 						updateThrottle = 0;
@@ -413,6 +431,15 @@
 						document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
 						document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
 						document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
+						
+						fuelArray.append(new Date().getTime(), parsedData.lf);
+						altArray.append(new Date().getTime(), parsedData.alt);
+						gArray.append(new Date().getTime(), parsedData.g);
+						battArray.append(new Date().getTime(), parsedData.batt);
+						document.querySelector(".fuelGraph .currentValue").innerHTML = parsedData.lf;
+						document.querySelector(".altGraph .currentValue").innerHTML = parsedData.alt;
+						document.querySelector(".gGraph .currentValue").innerHTML = parsedData.g;
+						document.querySelector(".battGraph .currentValue").innerHTML = parsedData.batt;
 					}).error(function(jqXHR, textStatus, errorThrown) {
 						updateThrottle = 10000;
 						log(".term","Interface update failed: Unable to contact vessel. Retrying in ten seconds.","&nbsp;>");
@@ -480,19 +507,24 @@
 
 			function createTimeline() {
 				var battChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				battChart.addTimeSeries(randomBatt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
+				battChart.addTimeSeries(battArray, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				battCanvas = document.querySelector('.battGraph .smoothie-chart'),
 				battChart.streamTo(battCanvas, 500);
 				
 				var fuelChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				fuelChart.addTimeSeries(randomFuel, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
+				fuelChart.addTimeSeries(fuelArray, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				fuelCanvas = document.querySelector('.fuelGraph .smoothie-chart'),
 				fuelChart.streamTo(fuelCanvas, 500);
 				
 				var altChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				altChart.addTimeSeries(randomAlt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
+				altChart.addTimeSeries(altArray, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				altCanvas = document.querySelector('.altGraph .smoothie-chart'),
 				altChart.streamTo(altCanvas, 500);
+				
+				var gChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
+				gChart.addTimeSeries(gArray, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
+				gCanvas = document.querySelector('.gGraph .smoothie-chart'),
+				gChart.streamTo(gCanvas, 500);
 			}
 			
 			log(".term","Console output started.","T-X");
