@@ -409,25 +409,25 @@
 				randomBatt.append(new Date().getTime(), randomBattValue);
 				randomAlt.append(new Date().getTime(), randomAltValue);
 				randomFuel.append(new Date().getTime(), randomFuelValue);
-				document.querySelector(".battGraph .currentValue").innerHTML = randomBattValue;
-				document.querySelector(".altGraph .currentValue").innerHTML = randomAltValue;
-				document.querySelector(".fuelGraph .currentValue").innerHTML = randomFuelValue;
+				document.querySelector(".battGraph .currentValue").innerHTML = randomBattValue.toPrecision(6);
+				document.querySelector(".altGraph .currentValue").innerHTML = randomAltValue.toPrecision(6);
+				document.querySelector(".fuelGraph .currentValue").innerHTML = randomFuelValue.toPrecision(6);
 			}, 500);
 			
 
 			function createTimeline() {
 				var battChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				battChart.addTimeSeries(randomBatt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 22,fontFamily: 'Unifont'}});
+				battChart.addTimeSeries(randomBatt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				battCanvas = document.querySelector('.battGraph .smoothie-chart'),
 				battChart.streamTo(battCanvas, 500);
 				
 				var fuelChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				fuelChart.addTimeSeries(randomFuel, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 22,fontFamily: 'Unifont'}});
+				fuelChart.addTimeSeries(randomFuel, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				fuelCanvas = document.querySelector('.fuelGraph .smoothie-chart'),
 				fuelChart.streamTo(fuelCanvas, 500);
 				
 				var altChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
-				altChart.addTimeSeries(randomAlt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 22,fontFamily: 'Unifont'}});
+				altChart.addTimeSeries(randomAlt, {lineWidth:2,strokeStyle:'#ff8000',fillStyle:'rgba(128,128,192,0.30)', labels : {fontSize: 16,fontFamily: 'Unifont'},timestampFormatter:SmoothieChart.timeFormatter});
 				altCanvas = document.querySelector('.altGraph .smoothie-chart'),
 				altChart.streamTo(altCanvas, 500);
 			}
