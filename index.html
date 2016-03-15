@@ -346,6 +346,8 @@
 			var URL = "127.0.0.1:8085";
 			var updateRate = 100;
 			var updateThrottle = 10000;
+			var connectionAttempted = true;
+			var demoMode = true;
 
 			function doApiRequest(apiString) {
 				$.get("http://"+URL+"/telemachus/datalink?a="+apiString).success(function(data) {
@@ -361,7 +363,30 @@
 				$(terminalIdentifier).animate({scrollTop:$(terminalIdentifier)[0].scrollHeight}, 1000);
 			}
 			
+			var updateTimer;
+			
+			var randomBatt = new TimeSeries();
+			var randomAlt = new TimeSeries();
+			var randomFuel = new TimeSeries();
+			
 			function updateInterface() {
+				/* graph code begins */
+				if(demoMode) {
+					var randomBattValue =  Math.random() * 10000;
+					var randomAltValue =  Math.random() * 10000;
+					var randomFuelValue =  Math.random() * 10000;
+					randomBatt.append(new Date().getTime(), randomBattValue);
+					randomAlt.append(new Date().getTime(), randomAltValue);
+					randomFuel.append(new Date().getTime(), randomFuelValue);
+					document.querySelector(".battGraph .currentValue").innerHTML = randomBattValue.toPrecision(6);
+					document.querySelector(".altGraph .currentValue").innerHTML = randomAltValue.toPrecision(6);
+					document.querySelector(".fuelGraph .currentValue").innerHTML = randomFuelValue.toPrecision(6);
+					document.querySelector(".meter.battMeter .meterState").style.top = 100-(randomBattValue/10000)*100+"%";
+					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
+					document.querySelector(".meter.loMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
+				}
+				/* graph code ends */
+
 				var requestString = "throttle=f.throttle";
 				requestString += "&lfmax=r.resourceMax[LiquidFuel]";
 				requestString += "&lomax=r.resourceMax[Oxidizer]";
@@ -379,7 +404,7 @@
 					updateThrottle = 10000;
 					log(".term","Interface update failed: Unable to contact vessel. Retrying in ten seconds.","&nbsp;>");
 				});
-				setTimeout(function(){ updateInterface(); }, updateRate+updateThrottle);
+				updateTimer = setTimeout(function(){ updateInterface(); }, updateRate+updateThrottle);
 			}
 
 			$(".termInput input").keyup(function(key) {
@@ -388,9 +413,25 @@
 					var sanitizedInput = termInput.toLowerCase().trim();
 					log(".term",termInput,"&nbsp;<");
 					document.querySelector(".termInput input").value = "";
-					switch(sanitizedInput) {
+					var splitInput = sanitizedInput.split(" ");
+					switch(splitInput[0]) {
 						case "help": {
 							log(".term","Haven't got any help for you yet, sorry.","&nbsp;>");
+							break;
+						}
+						case "connect": {
+							if (!!splitInput[1]) {
+								URL = splitInput[1];
+							}
+							updateInterface();
+							connectionAttempted = true;
+							log(".term","Attempting to connect to vessel at address "+URL+".","&nbsp;>");
+							break;
+						}
+						case "disconnect": {
+							clearTimeout(updateTimer);
+							log(".term","Disconnecting from vessel at address "+URL+".","&nbsp;>");
+							connectionAttempted = false;
 							break;
 						}
 						default: {
@@ -399,24 +440,7 @@
 						}
 					}
 				}
-			});
-
-			// Randomly add a data point every 500ms
-			var randomBatt = new TimeSeries();
-			var randomAlt = new TimeSeries();
-			var randomFuel = new TimeSeries();
-			setInterval(function() {
-				var randomBattValue =  Math.random() * 10000;
-				var randomAltValue =  Math.random() * 10000;
-				var randomFuelValue =  Math.random() * 10000;
-				randomBatt.append(new Date().getTime(), randomBattValue);
-				randomAlt.append(new Date().getTime(), randomAltValue);
-				randomFuel.append(new Date().getTime(), randomFuelValue);
-				document.querySelector(".battGraph .currentValue").innerHTML = randomBattValue.toPrecision(6);
-				document.querySelector(".altGraph .currentValue").innerHTML = randomAltValue.toPrecision(6);
-				document.querySelector(".fuelGraph .currentValue").innerHTML = randomFuelValue.toPrecision(6);
-			}, 500);
-			
+			});			
 
 			function createTimeline() {
 				var battChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
