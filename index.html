@@ -45,6 +45,18 @@
 				text-align: center;
 				padding-bottom: 0em;
 			}
+			
+			.noConnection .meter .meterState, .noConnection .button, .noConnection .uiContainer {
+				background-color: #333 !important;
+			}
+			
+			.noConnection .graph canvas {
+				opacity: 0.3;
+			}
+			
+			.noConnection.appContainer {
+				border-color: red !important;
+			}
 
 			/* button styles begin */
 
@@ -137,10 +149,6 @@
 				border: 1px solid #13B;
 				margin: 0px;
 				box-sizing: border-box;
-				background-image: url("http://qipeace.com/images/SineGoldSide.png");
-				background-size: contain;
-				background-repeat: repeat-x;
-				background-position: 50% 50%;
 				margin-left: -0.15em;
 				margin-bottom: 0.1em;
 				min-height: 152px;
@@ -371,7 +379,7 @@
 			
 			function updateInterface() {
 				/* graph code begins */
-				if(demoMode) {
+				if (demoMode) {
 					var randomBattValue =  Math.random() * 10000;
 					var randomAltValue =  Math.random() * 10000;
 					var randomFuelValue =  Math.random() * 10000;
@@ -385,6 +393,11 @@
 					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
 					document.querySelector(".meter.loMeter .meterState").style.top = 100-(randomFuelValue/10000)*100+"%";
 				}
+				if (!connectionAttempted) {
+					$(".appContainer").addClass("noConnection");
+				} else {
+					$(".appContainer").removeClass("noConnection");
+				}
 				/* graph code ends */
 
 				var requestString = "throttle=f.throttle";
@@ -393,17 +406,18 @@
 				requestString += "&lf=r.resource[LiquidFuel]";
 				requestString += "&lo=r.resource[Oxidizer]";
 				requestString += "&mTime=v.missionTime";
-				$.get("http://"+URL+"/telemachus/datalink?"+requestString).success(function(data) {
-					updateThrottle = 0;
-					var parsedData = $.parseJSON(data);
-					document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
-					document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
-					document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
-					log(".term","Test.","T+"+Math.round(Number(parsedData.mTime)));
-				}).error(function(jqXHR, textStatus, errorThrown) {
-					updateThrottle = 10000;
-					log(".term","Interface update failed: Unable to contact vessel. Retrying in ten seconds.","&nbsp;>");
-				});
+				if (connectionAttempted) {
+					$.get("http://"+URL+"/telemachus/datalink?"+requestString).success(function(data) {
+						updateThrottle = 0;
+						var parsedData = $.parseJSON(data);
+						document.querySelector(".meter.throttleMeter .meterState").style.top = 100-parsedData.throttle*100+"%";
+						document.querySelector(".meter.lfMeter .meterState").style.top = 100-(parsedData.lf/parsedData.lfmax)*100+"%";
+						document.querySelector(".meter.loMeter .meterState").style.top = 100-(parsedData.lo/parsedData.lomax)*100+"%";
+					}).error(function(jqXHR, textStatus, errorThrown) {
+						updateThrottle = 10000;
+						log(".term","Interface update failed: Unable to contact vessel. Retrying in ten seconds.","&nbsp;>");
+					});
+				}
 				updateTimer = setTimeout(function(){ updateInterface(); }, updateRate+updateThrottle);
 			}
 
@@ -416,22 +430,30 @@
 					var splitInput = sanitizedInput.split(" ");
 					switch(splitInput[0]) {
 						case "help": {
-							log(".term","Haven't got any help for you yet, sorry.","&nbsp;>");
+							log(".term","Available commands: connect, disconnect, shutdown, startup, help. Type help followed by a command for more information on that command.","&nbsp;>");
 							break;
 						}
 						case "connect": {
 							if (!!splitInput[1]) {
 								URL = splitInput[1];
 							}
-							updateInterface();
 							connectionAttempted = true;
 							log(".term","Attempting to connect to vessel at address "+URL+".","&nbsp;>");
+							refreshInterface();
 							break;
 						}
 						case "disconnect": {
-							clearTimeout(updateTimer);
 							log(".term","Disconnecting from vessel at address "+URL+".","&nbsp;>");
 							connectionAttempted = false;
+							refreshInterface();
+							break;
+						}
+						case "shutdown" : {
+							clearTimeout(updateTimer);
+							break;
+						}
+						case "startup" : {
+							updateInterface();
 							break;
 						}
 						default: {
@@ -441,6 +463,11 @@
 					}
 				}
 			});			
+			
+			function refreshInterface() {
+				clearTimeout(updateTimer);
+				updateInterface();
+			}
 
 			function createTimeline() {
 				var battChart = new SmoothieChart({millisPerPixel:41,grid:{strokeStyle:'#ffffff',sharpLines:true,borderVisible:false}});
