@@ -442,7 +442,7 @@
 						document.querySelector(".battGraph .currentValue").innerHTML = parsedData.batt;
 					}).error(function(jqXHR, textStatus, errorThrown) {
 						updateThrottle = 10000;
-						log(".term","Interface update failed: Unable to contact vessel, error code "+textStatus+" "errorThrown+". Retrying in ten seconds.","&nbsp;>");
+						log(".term","Interface update failed: Unable to contact vessel, error code "+textStatus+" "+errorThrown+". Retrying in ten seconds.","&nbsp;>");
 					});
 				}
 				updateTimer = setTimeout(function(){ updateInterface(); }, updateRate+updateThrottle);
